@@ -1,3 +1,149 @@
-@import './base.css';
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import "./base.css";
+@import "bootstrap/dist/css/bootstrap.min.css";
 
+:root {
+  --color-primary: #ffffff;
+  --color-header: #231c19;
+  --color-text: #00000;
+  --color-text-contrast: #fff;
+  --color-secondary: #32a1f0;
+  --color-toggle-background: #e0e0e0;
+  --color-toggle-background-secondary: #fff;
+}
+
+:root.dark-theme {
+  --color-primary: #031525;
+  --color-secondary: #162c46;
+  --color-text: #9bacc7;
+  --color-text-contrast: #9bacc7;
+  --color-toggle-background: #383838;
+  --color-toggle-background-secondary: #222;
+
+  --color-header: #231c19;
+}
+#app {
+  height: 100%;
+  background-color: #e7e4e2;
+}
+#header {
+  width: 100%;
+  opacity: 90%;
+  -webkit-transition: background-color 0.5s;
+  -ms-transition: background-color 0.5s;
+  transition: background-color 0.5s;
+  position: fixed;
+  background: var(--color-header);
+  z-index: 1500;
+}
+
+.header-holder {
+  max-width: 1175px;
+  margin: 0 auto;
+  padding: 0 25px;
+  min-width: 718px;
+  min-height: 56px;
+}
+.logo {
+  width: 130px;
+  height: 30px;
+  float: left;
+  font-size: 24px;
+  margin: 13px 71px 0 0;
+  color: #ffffff;
+}
+
+#nav {
+  float: left;
+  font-size: 14px;
+  line-height: 16px;
+  width: 250px;
+  margin: 20px 20px 0 0;
+  text-transform: uppercase;
+}
+
+#nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+}
+
+#nav li:first-child,
+.applinks-list li:first-child {
+  margin: 0;
+}
+
+#nav li {
+  float: left;
+  margin: 0 0 0 51px;
+}
+
+a {
+  text-decoration: none;
+  color: #a7a4a4;
+  outline: 0;
+  display: block;
+}
+
+#header a {
+  color: #fff;
+}
+
+#header .search {
+  float: left;
+  margin: 12px 0 0;
+  position: relative;
+}
+
+.head-links {
+  float: right;
+  margin: 10px 30px 0 0;
+}
+
+.user-panel {
+  float: left;
+  position: relative;
+}
+
+.user-panel .title {
+  display: inline-block;
+  color: #fff;
+  font-weight: 400;
+  vertical-align: top;
+  border-bottom: 1px solid #fff;
+}
+
+.carousel-item {
+  width: 100%;
+  height: 550px;
+}
+.carousel-item img {
+  object-fit: cover;
+}
+.carousel-item {
+  position: relative;
+}
+
+.carousel-item::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+}
+
+.premiere-movies {
+  width: 100%;
+  overflow: hidden;
+  padding: 21px 0 36px;
+  background: #e7e4e2;
+  min-height: 275px;
+}
+.content-holder {
+  max-width: 1175px;
+  margin: 0 auto;
+  padding: 0 25px;
+}
