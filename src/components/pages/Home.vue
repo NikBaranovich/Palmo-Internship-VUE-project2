@@ -1,16 +1,10 @@
 <template lang="">
-  <events-carousel :topEvents=topEvents />
+  <events-carousel :topEvents="topEvents" />
   <section class="premiere-movies">
     <div class="content-holder">
       <div id="film-holder-actual" class="film-box-holder">
-        <div v-for="event in events">
-          <event-box
-            :posterPath="
-              'http://localhost:8080/storage/events/posters' + event.poster_path
-            "
-            :title="event.title"
-            :id="event.id"
-          />
+        <div v-for="event in events.data">
+          <event-box :event="event" />
         </div>
       </div>
     </div>
@@ -25,7 +19,7 @@ import {useEventsStore} from "@/store/events.js";
 const {events, topEvents, fetchEvents, fetchTopEvents} = useEventsStore();
 onMounted(() => {
   fetchEvents();
-  fetchTopEvents();
+  fetchTopEvents(4);
 });
 </script>
 <style lang=""></style>

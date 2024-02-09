@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const axiosInstanse = axios.create({
+const axiosInstance = axios.create({
   baseURL: "http://localhost:8080/api",
-  headers:{
-    'Content-Type': 'application/json'
-  }
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
-
-export default axiosInstanse;
+axiosInstance.defaults.headers.common = {};
+export default axiosInstance;

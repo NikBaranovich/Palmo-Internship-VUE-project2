@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import axiosInstanse from "@/services/axios.js";
+import axiosInstance from "@/services/axios.js";
 import {toast} from "vue3-toastify";
 import {ref, reactive, computed, watch} from "vue";
 import {useCookies} from "vue3-cookies";
@@ -16,46 +16,50 @@ export const useCitiesStore = defineStore("cities", () => {
 
   function setupPreferredCity(cities) {
     let prefId = +cookies.get("preferredCity");
-    console.log("setup", prefId);
     if (prefId) {
       let city = cities.find(function (city, index) {
         return city.id == prefId;
       });
-      Object.assign(preferredCityState, city)
-      console.log(preferredCityState);
-    }
-    else{
-      console.log(cities[0]);
+      Object.assign(preferredCityState, city);
+    } else {
       updatePreferredCity(cities[0]);
     }
   }
+
+  const isCitiesLoading = computed(() => {
+    return isCitiesLoadingState.value;
+  });
+  const isCitiesLoadingState = ref(true);
 
   const cities = computed(() => {
     return citiesState;
   });
 
   const fetchCities = () => {
-    axiosInstanse
+    isCitiesLoadingState.value = true;
+    axiosInstance
       .get(`cities`)
       .then((response) => {
         response.data.forEach((city) => {
           citiesState.push(city);
         });
         setupPreferredCity(response.data);
-
+        isCitiesLoadingState.value = false;
       })
       .catch((error) => {
         toast.error(`Error while fetching cities. ${error.message}`);
+        isCitiesLoadingState.value = false;
       });
   };
 
   const updatePreferredCity = (city) => {
     cookies.set("preferredCity", city.id);
-    Object.assign(preferredCityState, city)
+    Object.assign(preferredCityState, city);
   };
   return {
     cities,
     preferredCity,
+    isCitiesLoading,
     updatePreferredCity,
     fetchCities,
     setupPreferredCity,

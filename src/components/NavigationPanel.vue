@@ -12,30 +12,25 @@
         </ul>
       </nav>
 
-      <form class="search" action="#" onsubmit="return false;">
-        <fieldset>
-          <input
-            type="text"
-            name="searchajax"
-            id="search-field"
-            class="search-head"
-            autocomplete="off"
-            placeholder="Search"
-          />
-          <ul
-            class="head-search-result-list search-focus search-list"
-            id="search-ul"
-          ></ul>
-        </fieldset>
-      </form>
-      <div class="head-links">
-        <city-list :cities="cities" />
+      <InputText placeholder="Search" />
 
+      <div class="head-links">
         <div class="user-panel">
-          <a href="#" class="title vkino-link btn-buy" target="_top"
-            >My tickets</a
-          >
+          <div v-color:white v-if="user && Object.keys(user).length">
+            Welcome, {{ user.name }}
+            <button @click="logoutHandler">Logout</button>
+          </div>
+          <div v-else-if="isUserLoading">
+            <p class="placeholder-glow my-0">
+              <span class="placeholder rounded" style="width: 200px"></span>
+            </p>
+          </div>
+          <div v-else>
+            <router-link :to="{name: 'login'}">Login</router-link>
+            <router-link :to="{name: 'register'}">Register</router-link>
+          </div>
         </div>
+        <city-list :cities="cities" />
 
         <toggle-switch v-model="isLightTheme" />
       </div>
@@ -44,24 +39,37 @@
 </template>
 
 <script setup>
+import Skeleton from "primevue/skeleton";
+import InputText from "primevue/inputtext";
+
 import ToggleSwitch from "@/components/UI/ToggleSwitch.vue";
 import CityList from "@/components/UI/CityList.vue";
+import {useAuthorizationStore} from "../store/authorization.js";
 
 import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {onMounted} from "vue";
 import {useCitiesStore} from "@/store/cities.js";
 import {useCookies} from "vue3-cookies";
-let router = useRouter();
+import {storeToRefs} from "pinia";
 
-const {cities, preferredCity, setupPreferredCity, fetchCities} =
-  useCitiesStore();
+let router = useRouter();
+const {auth, logout} = useAuthorizationStore();
+const {user, isUserLoading} = storeToRefs(useAuthorizationStore());
+
+const {cities, fetchCities} = useCitiesStore();
 const {cookies} = useCookies();
 
-onMounted(() => {
+onMounted(async () => {
   fetchCities();
+  await auth();
 });
-
+function logoutHandler() {
+  logout();
+  router.push({
+    name: "home",
+  });
+}
 //Theme switch
 function getMediaPreference() {
   const hasDarkPreference = window.matchMedia(
@@ -70,16 +78,19 @@ function getMediaPreference() {
   return hasDarkPreference;
 }
 function getTheme() {
-  const theme = localStorage.getItem("user-theme");
+  let theme = cookies.get("user-theme");
+  if (!theme) {
+    theme = getMediaPreference() ? "light-theme" : "dark-theme";
+  }
   return theme == "light-theme" ? true : false;
 }
 function setTheme(isLightTheme) {
   const theme = isLightTheme ? "light-theme" : "dark-theme";
-  localStorage.setItem("user-theme", theme);
+  cookies.set("user-theme", theme);
   document.documentElement.className = theme;
 }
 
-const initUserTheme = getTheme() || getMediaPreference();
+const initUserTheme = getTheme();
 setTheme(initUserTheme);
 
 let isLightTheme = ref(getTheme());

@@ -4,7 +4,7 @@ import {toast} from "vue3-toastify";
 import {ref, reactive, computed} from "vue";
 
 export const useEventsStore = defineStore("events", () => {
-  let eventsState = reactive([]);
+  let eventsState = ref({});
 
   const events = computed(() => {
     return eventsState;
@@ -24,33 +24,46 @@ export const useEventsStore = defineStore("events", () => {
 
   const fetchEvents = () => {
     axiosInstanse
-      .get(`events/index`)
+      .get(`events/`, {
+        params: {per_page: 100},
+      })
       .then((response) => {
-        response.data.forEach((event) => {
-          eventsState.push(event);
-        });
+        eventsState.value = response.data;
       })
       .catch((error) => {
         toast.error(`Error while fetching events. ${error.message}`);
       });
   };
-  const fetchEventGenres = () => {
-    axiosInstanse
-      .get(`event-genres/`)
-      .then((response) => {
-        response.data.forEach((genres) => {
-          eventGenresState.push(genres);
+  const fetchSingleEvent = (id) => {
+    return new Promise((resolve, reject) => {
+      axiosInstanse
+        .get(`events/${id}`)
+        .then((response) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          toast.error(`Error while fetching venues. ${error.message}`);
+          reject(error);
         });
-      })
-      .catch((error) => {
-        toast.error(`Error while fetching events. ${error.message}`);
-      });
+    });
   };
-  const fetchTopEvents = () => {
+  const fetchEventGenres = async () => {
+    try {
+      const response = await axiosInstanse.get(`event-genres/`);
+      response.data.forEach((genre) => {
+        eventGenresState.push(genre);
+      });
+    } catch (error) {
+      toast.error(`Error while fetching events. ${error.message}`);
+    }
+  };
+  const fetchTopEvents = (limit) => {
     axiosInstanse
-      .get(`events/get-top?limit=4`)
+      .get(`events`, {
+        params: {limit, ticket_top: true},
+      })
       .then((response) => {
-        eventsState.length = 0;
+        topEventsState.length = 0;
         response.data.forEach((event) => {
           topEventsState.push(event);
         });
@@ -60,14 +73,14 @@ export const useEventsStore = defineStore("events", () => {
       });
   };
 
-  const fetchFilteredEvents = (startDate, venues) => {
+  const fetchFilteredEvents = (page, startDate, venues, genres, city) => {
+    startDate = startDate ? startDate.toLocaleString() : null;
     axiosInstanse
-      .get(`events/filter`, {params: {start_date: startDate, venues: venues}})
+      .get(`events`, {
+        params: {page, start_date: startDate, venues: venues, genres, city},
+      })
       .then((response) => {
-        eventsState.length = 0;
-        response.data.forEach((event) => {
-          eventsState.push(event);
-        });
+        eventsState.value = response.data;
       })
       .catch((error) => {
         toast.error(`Error while fetching top events. ${error.message}`);
@@ -80,6 +93,7 @@ export const useEventsStore = defineStore("events", () => {
     fetchEvents,
     fetchTopEvents,
     fetchFilteredEvents,
+    fetchSingleEvent,
     fetchEventGenres,
   };
 });

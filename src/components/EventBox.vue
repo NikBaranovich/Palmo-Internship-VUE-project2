@@ -1,8 +1,8 @@
 <template lang="">
   <div class="film-box">
     <div class="img-holder">
-      <a :href="'/events/' + id">
-        <img :src="posterPath" :alt="title" width="175" height="248" />
+      <a :href="'/events/' + event.id">
+        <img :src="'http://localhost:8080/storage/events/posters'+event.poster_path" :alt="event.title" width="175" height="248" />
       </a>
 
       <div class="btn-play-position">
@@ -11,19 +11,19 @@
           data-toggle="modal"
           data-target="#play-trailer"
           class="btn-play btn-play-circle"
-          :data-youtube_url="trailerUrl"
+          :data-youtube_url="event.trailer_url"
           ><span>►</span></a
         >
       </div>
     </div>
     <div class="sub-info">
       <div class="film-title-list">
-        <a :href="'/events/' + id" class="film-title"
-          ><span>{{ title }}</span></a
+        <a :href="'/events/' + event.id" class="film-title"
+          ><span>{{ event.title }}</span></a
         >
       </div>
 
-      <a class="btn-buy" :href="'/ua/show/' + id">
+      <a class="btn-buy" :href="'/ua/show/' + event.id">
         <span>Купити квитки</span>
       </a>
     </div>
@@ -33,10 +33,7 @@
 import {defineProps, defineEmits, computed} from "vue";
 
 const props = defineProps({
-  trailerUrl: String,
-  posterPath: String,
-  id: Number,
-  title: String,
+  event: Object,
 });
 </script>
 <style scoped>

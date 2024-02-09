@@ -2,7 +2,7 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 
 :root {
-  --color-primary: #ffffff;
+  --color-primary: #e7e4e2;
   --color-header: #231c19;
   --color-text: #00000;
   --color-text-contrast: #fff;
@@ -12,7 +12,7 @@
 }
 
 :root.dark-theme {
-  --color-primary: #031525;
+  --color-primary: #3f4b55;
   --color-secondary: #162c46;
   --color-text: #9bacc7;
   --color-text-contrast: #9bacc7;
@@ -21,9 +21,16 @@
 
   --color-header: #231c19;
 }
-#app {
+html {
   height: 100%;
-  background-color: #e7e4e2;
+}
+body {
+  min-height: 100%;
+  background-color: var(--color-primary);
+}
+#app {
+  min-height: 100%;
+  background-color: var(--color-primary);
 }
 #header {
   width: 100%;
@@ -38,6 +45,8 @@
 
 .header-holder {
   max-width: 1175px;
+  display: flex;
+  align-items: center;
   margin: 0 auto;
   padding: 0 25px;
   min-width: 718px;
@@ -46,18 +55,16 @@
 .logo {
   width: 130px;
   height: 30px;
-  float: left;
   font-size: 24px;
-  margin: 13px 71px 0 0;
+  margin: 0px 71px 0 0;
   color: #ffffff;
 }
 
 #nav {
-  float: left;
   font-size: 14px;
   line-height: 16px;
-  width: 250px;
-  margin: 20px 20px 0 0;
+  width: 150px;
+  margin: 0px 20px 0 0;
   text-transform: uppercase;
 }
 
@@ -67,7 +74,9 @@
   list-style: none;
   width: 100%;
 }
-
+body .p-rating .p-rating-icon {
+  color: rgb(211, 211, 73);
+}
 #nav li:first-child,
 .applinks-list li:first-child {
   margin: 0;
@@ -96,13 +105,17 @@ a {
 }
 
 .head-links {
-  float: right;
-  margin: 10px 30px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px 30px 0 0;
 }
 
 .user-panel {
-  float: left;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px 30px 0 40px;
 }
 
 .user-panel .title {

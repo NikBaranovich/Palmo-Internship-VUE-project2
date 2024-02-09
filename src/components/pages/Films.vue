@@ -10,6 +10,7 @@
             :maxDate="maxDate"
             :manualInput="false"
             :showIcon="true"
+            dateFormat="d M yy"
           />
           <label for="start_date">Choose event date</label>
         </span>
@@ -20,7 +21,7 @@
           <MultiSelect
             id="ms-cities"
             v-model="selectedVenues"
-            :options="venues"
+            :options="venuesList"
             optionLabel="name"
             :maxSelectedLabels="3"
             style="width: 200px"
@@ -43,36 +44,23 @@
           />
           <label for="ms-cities">Select Genres</label>
         </span>
-        <div
-          class="p-float-label w-full md:w-14rem"
-          style="width: 200px; display: inline-block"
-        >
-          <Dropdown
-            v-model="selectedCity"
-            inputId="dd-city"
-            :options="venues"
-            optionLabel="name"
-            class="w-full"
-          />
-          <label for="dd-city">Select a City</label>
-        </div>
-        <button @click="filterEvents">Filter</button>
+
+        <button @click="filterEvents()">Filter</button>
       </div>
     </div>
     <div class="film-list">
-      <ul v-for="event in events">
-        <EventListItem :event="event"/>
+      <ul v-for="event in events.data">
+        <EventListItem :event="event" />
       </ul>
-      <!-- <div >
-        <event-box
-          :posterPath="
-            'http://localhost:8080/storage/events/posters' + event.poster_path
-          "
-          :title="event.title"
-          :id="event.id"
-        />
-      </div> -->
     </div>
+  </div>
+  <div class="footer-pagination">
+    <Bootstrap5Pagination
+      id="pagination"
+      :data="events"
+      @pagination-change-page="filterEvents"
+      @click="scrollToTop"
+    />
   </div>
 </template>
 <script setup>
@@ -80,40 +68,187 @@ import Calendar from "primevue/calendar";
 import MultiSelect from "primevue/multiselect";
 import Dropdown from "primevue/dropdown";
 import EventListItem from "../EventListItem.vue";
-import {ref} from "vue";
+import {Bootstrap5Pagination} from "laravel-vue-pagination";
 
-const date = ref();
+import {ref} from "vue";
+import {useRouter, useRoute} from "vue-router";
+
+const date = ref(new Date());
 const selectedVenues = ref();
+const selectedVenuesId = ref();
 const selectedGenres = ref();
+const selectedGenresId = ref();
 const minDate = ref(new Date());
 const maxDate = ref(new Date());
+const router = useRouter();
+const route = useRoute();
 
-minDate.value.setDate(minDate.value.getDate() - 14);
+maxDate.value.setDate(maxDate.value.getDate() + 14);
 
 import EventBox from "@/components/EventBox.vue";
 import EventsCarousel from "@/components/EventsCarousel.vue";
-import {onMounted} from "vue";
+import {watch, onMounted} from "vue";
 import {useEventsStore} from "@/store/events.js";
 import {useVenuesStore} from "@/store/venues.js";
-const {venues, fetchVenues} = useVenuesStore();
-const {events, topEvents,eventGenres, fetchEvents, fetchFilteredEvents,fetchEventGenres} = useEventsStore();
-onMounted(() => {
-  fetchEvents();
-  fetchVenues();
-  fetchEventGenres();
+import {useCitiesStore} from "@/store/cities.js";
+const {venuesList, fetchVenuesList} = useVenuesStore();
+const {preferredCity} = useCitiesStore();
+const {
+  events,
+  eventGenres,
+  topEvents,
+  fetchEvents,
+  fetchFilteredEvents,
+  fetchEventGenres,
+} = useEventsStore();
+onMounted(async () => {
+  await fetchEventGenres();
+  await fetchVenuesList({city: preferredCity.id});
 });
 
-const cities = ref([
-  {name: "New York", code: "NY"},
-  {name: "Rome", code: "RM"},
-  {name: "London", code: "LDN"},
-  {name: "Istanbul", code: "IST"},
-  {name: "Paris", code: "PRS"},
-]);
+const filterEvents = (page = 1) => {
+  const query = {};
 
-const filterEvents = () => {
-    fetchFilteredEvents(date.value, selectedVenues.value);
+  if (date.value) {
+    query.date = JSON.stringify(date.value.toDateString());
+  }
+
+  if (selectedVenues.value?.length > 0) {
+    query.selectedVenues = JSON.stringify(selectedVenuesId.value);
+  }
+
+  if (selectedGenres.value?.length > 0) {
+    query.selectedGenres = JSON.stringify(selectedGenresId.value);
+  }
+
+  query.page = page;
+
+  router.push({
+    query,
+  });
 };
+watch(eventGenres, (eventGenres) => {
+  if (isJsonString(route.query.selectedGenres) && eventGenres.length) {
+    selectedGenresId.value = route.query.selectedGenres
+      ? JSON.parse(route.query.selectedGenres)
+      : [];
+    selectedGenres.value = selectedGenresId.value
+      .map((genreId) => {
+        return eventGenres.find((genre) => genre.id === genreId);
+      })
+      .filter(Boolean);
+  }
+});
+watch(preferredCity, async (preferredCity) => {
+  await fetchVenuesList({city: preferredCity.id});
+
+  if (isJsonString(route.query.selectedVenues)) {
+    selectedVenuesId.value = route.query.selectedVenues
+      ? JSON.parse(route.query.selectedVenues)
+      : [];
+    selectedVenues.value = selectedVenuesId.value
+      .map((venueId) => {
+        let venue = venuesList.find((venue) => venue.id === venueId);
+
+        return venue;
+      })
+      .filter(Boolean);
+  }
+
+  fetchFilteredEvents(
+    route.query.page,
+    date.value,
+    selectedVenuesId.value,
+    selectedGenresId.value,
+    preferredCity.id
+  );
+});
+
+watch(
+  () => route.query,
+  (query) => {
+    if (isJsonString(query.date)) {
+      date.value = isValidDate(new Date(JSON.parse(query.date)))
+        ? new Date(JSON.parse(query.date))
+        : new Date();
+      if (date.value < minDate.value || date.value > maxDate.value) {
+        date.value = new Date();
+      }
+    }
+
+    if (
+      isJsonString(query.selectedVenues) &&
+      venuesList.length &&
+      Array.isArray(JSON.parse(query.selectedVenues))
+    ) {
+      selectedVenuesId.value = query.selectedVenues
+        ? JSON.parse(query.selectedVenues)
+        : [];
+      selectedVenues.value = selectedVenuesId.value
+        .map((venueId) => {
+          let venue = venuesList.find((venue) => venue.id === venueId);
+
+          return venue;
+        })
+        .filter(Boolean);
+    }
+    if (
+      isJsonString(query.selectedGenres) &&
+      eventGenres.length &&
+      Array.isArray(JSON.parse(query.selectedGenres))
+    ) {
+      selectedGenresId.value = query.selectedGenres
+        ? JSON.parse(query.selectedGenres)
+        : [];
+      selectedGenres.value = selectedGenresId.value
+        .map((genreId) => {
+          return eventGenres.find((genre) => genre.id === genreId);
+        })
+        .filter(Boolean);
+    }
+    fetchFilteredEvents(
+      query.page,
+      date.value,
+      selectedVenuesId.value,
+      selectedGenresId.value,
+      preferredCity.id
+    );
+  },
+  {immediate: true}
+);
+
+watch(
+  () => selectedVenues.value,
+  (value) => {
+    selectedVenuesId.value = value?.map((venue) => venue.id);
+  },
+  {immediate: true}
+);
+watch(
+  () => selectedGenres.value,
+  (value) => {
+    selectedGenresId.value = value?.map((genre) => genre.id);
+  },
+  {immediate: true}
+);
+function isValidDate(date) {
+  return date instanceof Date && !isNaN(date);
+}
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
 </script>
 <style scoped>
 .film-content {
@@ -138,5 +273,8 @@ const filterEvents = () => {
 .film-list {
   padding: 0 10px;
 }
-
+.footer-pagination {
+  display: flex;
+  justify-content: center;
+}
 </style>

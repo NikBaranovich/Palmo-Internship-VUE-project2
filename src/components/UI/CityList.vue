@@ -1,27 +1,34 @@
 <template>
   <div class="cities-dropdown">
     <div class="dropdown">
-      <button
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton"
-        data-bs-toggle="dropdown"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >
-        {{ preferredCity?.name }}
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li
-          class="dropdown-item"
-          v-for="city in cities"
-          :data-id="city.id"
-          :key="city.id"
-          @click="selectCity(city)"
+      <div v-if="isCitiesLoading" class="btn btn-secondary">
+        <p class="placeholder-glow my-0">
+          <span class="placeholder rounded" style="width: 100px"></span>
+        </p>
+      </div>
+      <div v-else>
+        <button
+          class="btn btn-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
         >
-          {{ city.name }}
-        </li>
-      </ul>
+          {{ preferredCity?.name }}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li
+            class="dropdown-item"
+            v-for="city in cities"
+            :data-id="city.id"
+            :key="city.id"
+            @click="selectCity(city)"
+          >
+            {{ city.name }}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -29,8 +36,10 @@
 <script setup>
 import {ref} from "vue";
 import {useCitiesStore} from "@/store/cities.js";
+import {storeToRefs} from "pinia";
 
-const {preferredCity, updatePreferredCity} = useCitiesStore();
+const {updatePreferredCity} = useCitiesStore();
+const {isCitiesLoading, preferredCity} = storeToRefs(useCitiesStore());
 
 const props = defineProps({
   cities: Array,

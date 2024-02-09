@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import axiosInstanse from "@/services/axios.js";
+import axiosInstance from "@/services/axios.js";
 import {toast} from "vue3-toastify";
 import {ref, reactive, computed} from "vue";
 
@@ -10,22 +10,51 @@ export const useVenuesStore = defineStore("venues", () => {
     return venuesState;
   });
 
-  const fetchVenues = () => {
-    axiosInstanse
-      .get(`entertainment_venues/`)
-      .then((response) => {
-        response.data.forEach((venue) => {
+  let venuesListState = reactive([]);
+
+  const venuesList = computed(() => {
+    return venuesListState;
+  });
+
+  const fetchVenues = async (params) => {
+    return new Promise((resolve, reject) => {
+      axiosInstance
+        .get(`entertainment_venues/`, {params})
+        .then((response) => {
+          venuesState.length = 0;
+          response.data.forEach((venue) => {
             venuesState.push(venue);
+          });
+          resolve(response.data);
+        })
+        .catch((error) => {
+          toast.error(`Error while fetching venues. ${error.message}`);
+          reject(error);
         });
-      })
-      .catch((error) => {
-        toast.error(`Error while fetching venues. ${error.message}`);
-      });
+    });
+  };
+  const fetchVenuesList = async (params) => {
+    return new Promise((resolve, reject) => {
+      axiosInstance
+        .get(`entertainment_venues/list`, {params})
+        .then((response) => {
+          venuesListState.length = 0;
+          response.data.forEach((venue) => {
+            venuesListState.push(venue);
+          });
+          resolve(response.data);
+        })
+        .catch((error) => {
+          toast.error(`Error while fetching venues. ${error.message}`);
+          reject(error);
+        });
+    });
   };
 
-  
   return {
     venues,
+    venuesList,
     fetchVenues,
+    fetchVenuesList,
   };
 });

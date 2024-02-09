@@ -1,6 +1,6 @@
 <template lang="">
   <li class="film-block">
-    <a class="film-photo" href="/films/luablua-tebe-nenavid-ti" title="">
+    <a class="film-photo" :href="'/films/' + event.id" title="">
       <div class="photo-block">
         <picture>
           <img
@@ -30,10 +30,12 @@
         </div>
         <div class="count-votes">{{ event.rating_count || 0 }} votes</div>
       </div>
-      <a href="/films/luablua-tebe-nenavid-ti" class="film-title" title="">{{
+      <a :href="'/films/' + event.id" class="film-title" title="">{{
         event.title
       }}</a>
-      <p class="genres">none</p>
+      <p class="genres">
+        {{ event.genres.map((genre) => genre.name).join(", ") }}
+      </p>
       <p>
         <span class="list-small">{{ event.overview }}</span>
       </p>
@@ -164,7 +166,6 @@ const props = defineProps({
 }
 
 .film-photo img {
-  min-width: 100%;
   min-height: 100%;
   height: 100%;
 }

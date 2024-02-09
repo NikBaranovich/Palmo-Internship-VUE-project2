@@ -2,7 +2,7 @@ import "./assets/main.css";
 import router from "@/router/router.js";
 import PrimeVue from "primevue/config";
 import "bootstrap/dist/js/bootstrap.bundle.js";
-import 'primevue/resources/themes/aura-light-green/theme.css'
+import "primevue/resources/themes/aura-light-noir/theme.css";
 
 import {createPinia} from "pinia";
 import {createApp} from "vue";
@@ -18,5 +18,11 @@ createApp(App)
   .use(pinia)
   .use(Vue3Toastify, {
     autoClose: 2000,
+  })
+  .directive("color", {
+    mounted(el, binding) {
+      const color = binding.value || binding.arg || "black";
+      el.style.color = color;
+    },
   })
   .mount("#app");
