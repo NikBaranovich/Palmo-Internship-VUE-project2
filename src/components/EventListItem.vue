@@ -5,7 +5,7 @@
         <picture>
           <img
             :src="
-              'http://localhost:8080/storage/events/posters' + event.poster_path
+              'http://localhost:8080/storage/' + event.poster_path
             "
             class="photo ls-is-cached lazyloaded"
             :alt="event.title"
@@ -40,7 +40,8 @@
         <span class="list-small">{{ event.overview }}</span>
       </p>
       <p>
-        Premier in Ukraine:<span>{{ event.release_date }}</span>
+        Premier in Ukraine:
+        <span class="mx-1">{{ formatDate(event.release_date) }}</span>
       </p>
     </div>
   </li>
@@ -51,6 +52,19 @@ import {defineProps} from "vue";
 const props = defineProps({
   event: Object,
 });
+
+function formatDate(dateString) {
+  // Создаем объект Date из строки
+  const date = new Date(dateString);
+
+  // Извлекаем день, месяц и год
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  // Форматируем дату в требуемый формат
+  return `${day}.${month}.${year}`;
+}
 </script>
 <style scoped>
 .film-block {

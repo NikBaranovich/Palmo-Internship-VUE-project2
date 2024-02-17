@@ -1,52 +1,49 @@
 <template lang="">
   <div class="film-content">
     <div class="filter-block">
-      <div class="datepicker-block">
-        <span class="p-float-label" style="width: 200px; display: inline-block">
-          <Calendar
-            v-model="date"
-            id="start_date"
-            :minDate="minDate"
-            :maxDate="maxDate"
-            :manualInput="false"
-            :showIcon="true"
-            dateFormat="d M yy"
-          />
-          <label for="start_date">Choose event date</label>
-        </span>
-        <span
-          class="p-float-label w-full md:w-20rem"
-          style="width: 200px; display: inline-block"
-        >
-          <MultiSelect
-            id="ms-cities"
-            v-model="selectedVenues"
-            :options="venuesList"
-            optionLabel="name"
-            :maxSelectedLabels="3"
-            style="width: 200px"
-            class="w-full"
-          />
-          <label for="ms-cities">Select Venues</label>
-        </span>
-        <span
-          class="p-float-label w-full md:w-20rem"
-          style="width: 200px; display: inline-block"
-        >
-          <MultiSelect
-            id="ms-cities"
-            v-model="selectedGenres"
-            :options="eventGenres"
-            optionLabel="name"
-            :maxSelectedLabels="3"
-            style="width: 200px"
-            class="w-full"
-          />
-          <label for="ms-cities">Select Genres</label>
-        </span>
-
-        <button @click="filterEvents()">Filter</button>
-      </div>
+      <span class="p-float-label" style="width: 200px; display: inline-block">
+        <Calendar
+          v-model="date"
+          id="start_date"
+          :minDate="minDate"
+          :maxDate="maxDate"
+          :manualInput="false"
+          :showIcon="true"
+          dateFormat="d M yy"
+        />
+        <label for="start_date">Choose event date</label>
+      </span>
+      <span
+        class="p-float-label w-full md:w-20rem"
+        style="width: 200px; display: inline-block"
+      >
+        <MultiSelect
+          id="ms-cities"
+          v-model="selectedVenues"
+          :options="venuesList"
+          optionLabel="name"
+          :maxSelectedLabels="3"
+          style="width: 200px"
+          class="w-full"
+        />
+        <label for="ms-cities">Select Venues</label>
+      </span>
+      <span
+        class="p-float-label w-full md:w-20rem"
+        style="width: 200px; display: inline-block"
+      >
+        <MultiSelect
+          id="ms-cities"
+          v-model="selectedGenres"
+          :options="genres"
+          optionLabel="name"
+          :maxSelectedLabels="3"
+          style="width: 200px"
+          class="w-full"
+        />
+        <label for="ms-cities">Select Genres</label>
+      </span>
+      <Button @click="filterEvents()" label="Filter" />
     </div>
     <div class="film-list">
       <ul v-for="event in events.data">
@@ -64,6 +61,7 @@
   </div>
 </template>
 <script setup>
+import Button from "primevue/button";
 import Calendar from "primevue/calendar";
 import MultiSelect from "primevue/multiselect";
 import Dropdown from "primevue/dropdown";
@@ -95,14 +93,14 @@ const {venuesList, fetchVenuesList} = useVenuesStore();
 const {preferredCity} = useCitiesStore();
 const {
   events,
-  eventGenres,
+  genres,
   topEvents,
   fetchEvents,
   fetchFilteredEvents,
-  fetchEventGenres,
+  fetchGenres,
 } = useEventsStore();
 onMounted(async () => {
-  await fetchEventGenres();
+  await fetchGenres();
   await fetchVenuesList({city: preferredCity.id});
 });
 
@@ -127,20 +125,29 @@ const filterEvents = (page = 1) => {
     query,
   });
 };
-watch(eventGenres, (eventGenres) => {
-  if (isJsonString(route.query.selectedGenres) && eventGenres.length) {
+watch(genres, (genres) => {
+  if (isJsonString(route.query.selectedGenres) && genres.length) {
     selectedGenresId.value = route.query.selectedGenres
       ? JSON.parse(route.query.selectedGenres)
       : [];
     selectedGenres.value = selectedGenresId.value
       .map((genreId) => {
-        return eventGenres.find((genre) => genre.id === genreId);
+        return genres.find((genre) => genre.id === genreId);
       })
       .filter(Boolean);
   }
 });
 watch(preferredCity, async (preferredCity) => {
   await fetchVenuesList({city: preferredCity.id});
+
+  if (isJsonString(route.query.date)) {
+    date.value = isValidDate(new Date(JSON.parse(route.query.date)))
+      ? new Date(JSON.parse(route.query.date))
+      : new Date();
+    if (date.value < minDate.value || date.value > maxDate.value) {
+      date.value = new Date();
+    }
+  }
 
   if (isJsonString(route.query.selectedVenues)) {
     selectedVenuesId.value = route.query.selectedVenues
@@ -167,6 +174,10 @@ watch(preferredCity, async (preferredCity) => {
 watch(
   () => route.query,
   (query) => {
+    if (!Object.keys(preferredCity).length) {
+      return;
+    }
+
     if (isJsonString(query.date)) {
       date.value = isValidDate(new Date(JSON.parse(query.date)))
         ? new Date(JSON.parse(query.date))
@@ -194,7 +205,7 @@ watch(
     }
     if (
       isJsonString(query.selectedGenres) &&
-      eventGenres.length &&
+      genres.length &&
       Array.isArray(JSON.parse(query.selectedGenres))
     ) {
       selectedGenresId.value = query.selectedGenres
@@ -202,7 +213,7 @@ watch(
         : [];
       selectedGenres.value = selectedGenresId.value
         .map((genreId) => {
-          return eventGenres.find((genre) => genre.id === genreId);
+          return genres.find((genre) => genre.id === genreId);
         })
         .filter(Boolean);
     }
@@ -267,7 +278,7 @@ function scrollToTop() {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .film-list {

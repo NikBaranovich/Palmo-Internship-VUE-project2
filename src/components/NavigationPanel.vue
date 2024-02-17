@@ -12,12 +12,34 @@
         </ul>
       </nav>
 
-      <InputText placeholder="Search" />
+      <InputText
+        placeholder="Search"
+        v-model="searchText"
+        @focus="showElement($refs.eventOptions)"
+        @focusout="handleSearchInputFocusOut($refs.eventOptions)"
+        ref="eventInput"
+      />
+      <datalist
+        @click="handleDatalistEventClick($event, $refs.eventOptions)"
+        class="visually-hidden"
+        id="event-options"
+        ref="eventOptions"
+      >
+        <template v-for="event in events">
+          <option :value="event.id">
+            {{ event.title }}
+          </option>
+        </template>
+      </datalist>
 
       <div class="head-links">
         <div class="user-panel">
-          <div v-color:white v-if="user && Object.keys(user).length">
-            Welcome, {{ user.name }}
+          <div
+            v-color:white
+            v-if="user && Object.keys(user).length"
+            class="user-info"
+          >
+            <span class="username">{{ user.name }}</span>
             <button @click="logoutHandler">Logout</button>
           </div>
           <div v-else-if="isUserLoading">
@@ -45,11 +67,13 @@ import InputText from "primevue/inputtext";
 import ToggleSwitch from "@/components/UI/ToggleSwitch.vue";
 import CityList from "@/components/UI/CityList.vue";
 import {useAuthorizationStore} from "../store/authorization.js";
+import {debounce} from "../hooks/useDebouce";
 
 import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {onMounted} from "vue";
 import {useCitiesStore} from "@/store/cities.js";
+import {useEventsStore} from "@/store/events.js";
 import {useCookies} from "vue3-cookies";
 import {storeToRefs} from "pinia";
 
@@ -58,18 +82,42 @@ const {auth, logout} = useAuthorizationStore();
 const {user, isUserLoading} = storeToRefs(useAuthorizationStore());
 
 const {cities, fetchCities} = useCitiesStore();
+const {searchEvents} = useEventsStore();
 const {cookies} = useCookies();
 
-onMounted(async () => {
-  fetchCities();
-  await auth();
-});
+const searchText = ref("");
+const events = ref(null);
 function logoutHandler() {
   logout();
   router.push({
     name: "home",
   });
 }
+
+async function fetchEvents(title) {
+  if (!title) {
+    return;
+  }
+
+  events.value = await searchEvents(title);
+}
+
+watch(searchText, (searchText) => {
+  debounce(() => {
+    fetchEvents(searchText);
+  });
+});
+
+function handleDatalistEventClick(event, datalistEvents) {
+  const target = event.target;
+
+  if (target.tagName === "OPTION") {
+    searchText.value = "";
+    router.push({path: `/films/${+target.value}`});
+  }
+  hideElement(datalistEvents);
+}
+
 //Theme switch
 function getMediaPreference() {
   const hasDarkPreference = window.matchMedia(
@@ -97,6 +145,57 @@ let isLightTheme = ref(getTheme());
 watch(isLightTheme, () => {
   setTheme(isLightTheme.value);
 });
+
+const hideElement = (element) => {
+  element.classList.add("visually-hidden");
+};
+const showElement = (element) => {
+  element.classList.remove("visually-hidden");
+};
+
+function handleSearchInputFocusOut(datalist) {
+  setTimeout(() => {
+    hideElement(datalist);
+  }, 300);
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+datalist {
+  display: block !important;
+  position: absolute !important;
+  background-color: white;
+  border: 1px solid #adb5bd;
+  border-radius: 0 0 5px 5px !important;
+  border-top: none;
+  width: 206px !important;
+  padding: 5px;
+  max-height: 10rem;
+  overflow-y: auto;
+  z-index: 999;
+  left: 577px;
+  top: 44px;
+}
+
+option {
+  padding: 4px;
+  margin-bottom: 1px;
+  cursor: pointer;
+}
+
+option:hover {
+  background-color: #d3d3d3;
+}
+.username {
+  padding-right: 5px;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+}
+</style>

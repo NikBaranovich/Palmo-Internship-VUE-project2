@@ -42,7 +42,9 @@ body {
   background: var(--color-header);
   z-index: 1500;
 }
-
+.p-autocomplete-panel {
+  z-index: 10001 !important;
+}
 .header-holder {
   max-width: 1175px;
   display: flex;

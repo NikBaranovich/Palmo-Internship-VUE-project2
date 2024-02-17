@@ -3,33 +3,35 @@
     <div class="theater-info">
       <a class="theater-name" href="/ua/cinema/5element"> {{ venue.name }} </a>
     </div>
-    <div class="hall-holder" v-for="hall in venue.halls">
-      <div class="hall-info" v-if="hall.sessions.length">
-        <div class="dotted">
-          <span>
-            <span class="subspan">Hall {{ hall.number }} </span>
-          </span>
+    <template v-for="hall in venue.halls">
+      <div class="hall-holder" v-if="hall.sessions.length">
+        <div class="hall-info">
+          <div class="dotted">
+            <span>
+              <span class="subspan">Hall {{ hall.number }} </span>
+            </span>
+          </div>
+        </div>
+        <div data-sort="day" class="schedule-holder">
+          <div class="schedule-frame">
+            <ul class="schedule-list">
+              <li v-for="session in hall.sessions">
+                <router-link :to="{ name: 'session', params: { id: session.id }}">
+                  <span class="price">{{
+                    new Date(session.start_time).toLocaleString("en-us", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hourCycle: "h24",
+                    })
+                  }}</span>
+                  <span class="buy">Buy</span>
+                </router-link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-      <div data-sort="day" class="schedule-holder">
-        <div class="schedule-frame">
-          <ul class="schedule-list">
-            <li v-for="session in hall.sessions">
-              <a href="/">
-                <span class="price">{{
-                  new Date(session.start_time).toLocaleString("en-us", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hourCycle: "h24",
-                  })
-                }}</span>
-                <span class="buy">Buy</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 <script setup>
@@ -51,10 +53,13 @@ const props = defineProps({
   width: 250px;
   margin: 0 20px 20px 0;
 }
+.hall-holder {
+  height: 60px;
+}
 .schedule-box .hall-info {
   float: left;
   width: 250px;
-  margin: 0 20px 20px 0;
+  margin: 0 20px 30px 0;
 }
 .schedule-box .theater-name {
   display: inline-block;
@@ -145,5 +150,22 @@ const props = defineProps({
   letter-spacing: 0.14px;
   text-align: right;
   color: #333;
+}
+.schedule-box .schedule-list a:hover .buy {
+  display: block;
+  line-height: 1;
+  font-size: 12px;
+}
+.schedule-box .schedule-list a:hover .price {
+  line-height: 12px !important;
+  font-size: 12px;
+}
+.schedule-box .schedule-list a:hover {
+  color: #fff;
+  padding: 1px 0 2px 0;
+  text-decoration: none;
+  border: 1px solid #ffba00;
+  background: #ffba00;
+  line-height: inherit;
 }
 </style>

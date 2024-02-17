@@ -3,6 +3,7 @@ import {toast} from "vue3-toastify";
 import axiosInstance from "@/services/axios.js";
 import {useCookies} from "vue3-cookies";
 const {cookies} = useCookies();
+import {useTicketsStore} from "@/store/tickets.js";
 
 import {debounce} from "../hooks/useDebouce";
 
@@ -17,22 +18,38 @@ export const useAuthorizationStore = defineStore("authorization", () => {
   });
 
   const isUserLoading = computed(() => {
-    return isUserLoadingState;
+    return isUserLoadingState.value;
   });
 
   async function auth() {
-    const token = cookies.get("personal_token");
-    if (!token) {
-      return;
-    }
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    isUserLoadingState.value = true;
     return new Promise((resolve, reject) => {
+      const token = cookies.get("personal_token");
+      if (!token) {
+        return;
+      }
+      const {downloadTickets} = useTicketsStore();
+
+      axiosInstance.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${token}`;
+      isUserLoadingState.value = true;
       axiosInstance
         .get(`auth/`)
         .then((response) => {
           Object.assign(userState, response.data);
           isUserLoadingState.value = false;
+          Echo.channel(`ticket-generation-${userState.id}`).listen(
+            "TicketGeneration",
+            (e) => {
+              downloadTickets(e.url);
+            }
+          );
+          Echo.channel(`email-notification-${userState.id}`).listen(
+            "EmailNotification",
+            (e) => {
+              toast.info(e.message);
+            }
+          );
           resolve(response.data);
         })
         .catch((error) => {
@@ -69,7 +86,6 @@ export const useAuthorizationStore = defineStore("authorization", () => {
   }
 
   async function signIn(email, password) {
-
     return new Promise((resolve, reject) => {
       axiosInstance
         .post(`auth/login`, {

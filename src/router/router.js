@@ -5,12 +5,14 @@ import Films from "@/components/pages/Films.vue";
 import Register from "@/components/pages/Register.vue";
 import Login from "@/components/pages/Login.vue";
 import NotFound from "@/components/pages/NotFound.vue";
+import Session from "@/components/pages/Session.vue";
 const SingleEvent = () => import("@/components/pages/SingleEvent.vue");
 
 const routes = [
   {path: "/", name: "home", component: Home},
   {path: "/films/:id", name: "event", component: SingleEvent},
   {path: "/films/", name: "films", component: Films},
+  {path: "/session/:id", name: "session", component: Session},
   {
     path: "/register",
     name: "register",

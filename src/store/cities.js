@@ -35,21 +35,19 @@ export const useCitiesStore = defineStore("cities", () => {
     return citiesState;
   });
 
-  const fetchCities = () => {
+  const fetchCities = async () => {
     isCitiesLoadingState.value = true;
-    axiosInstance
-      .get(`cities`)
-      .then((response) => {
-        response.data.forEach((city) => {
-          citiesState.push(city);
-        });
-        setupPreferredCity(response.data);
-        isCitiesLoadingState.value = false;
-      })
-      .catch((error) => {
-        toast.error(`Error while fetching cities. ${error.message}`);
-        isCitiesLoadingState.value = false;
+    try {
+      const response = await axiosInstance.get(`cities`);
+      response.data.forEach((city) => {
+        citiesState.push(city);
       });
+      setupPreferredCity(response.data);
+      isCitiesLoadingState.value = false;
+    } catch (error) {
+      toast.error(`Error while fetching cities. ${error.message}`);
+      isCitiesLoadingState.value = false;
+    }
   };
 
   const updatePreferredCity = (city) => {

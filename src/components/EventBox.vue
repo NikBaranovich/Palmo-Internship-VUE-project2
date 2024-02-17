@@ -1,31 +1,57 @@
 <template lang="">
   <div class="film-box">
     <div class="img-holder">
-      <a :href="'/events/' + event.id">
-        <img :src="'http://localhost:8080/storage/events/posters'+event.poster_path" :alt="event.title" width="175" height="248" />
-      </a>
-
-      <div class="btn-play-position">
-        <a
-          href="javascript:void(0)"
-          data-toggle="modal"
-          data-target="#play-trailer"
-          class="btn-play btn-play-circle"
-          :data-youtube_url="event.trailer_url"
-          ><span>►</span></a
-        >
-      </div>
+      <template v-if="event.id">
+        <a :href="'/films/' + event.id">
+          <img
+            :src="
+              'http://localhost:8080/storage/' + event.poster_path
+            "
+            :alt="event.title"
+            width="175"
+            height="248"
+          />
+        </a>
+        <template v-if="event.trailer_url">
+          <div class="btn-play-position">
+            <p
+              class="btn-play btn-play-circle"
+              :data-youtube_url="event.trailer_url"
+            >
+              <span>►</span>
+            </p>
+          </div>
+        </template>
+      </template>
+      <template v-else>
+        <p class="placeholder-glow my-0">
+          <span class="placeholder" style="width: 175px; height: 248px"></span>
+        </p>
+      </template>
     </div>
     <div class="sub-info">
       <div class="film-title-list">
-        <a :href="'/events/' + event.id" class="film-title"
-          ><span>{{ event.title }}</span></a
-        >
+        <template v-if="event.id">
+          <a :href="'/films/' + event.id" class="film-title"
+            ><span>{{ event.title }}</span></a
+          >
+        </template>
+        <template v-else>
+          <p class="placeholder-glow my-0">
+            <span class="placeholder rounded" style="width: 100px"></span>
+          </p>
+        </template>
       </div>
-
-      <a class="btn-buy" :href="'/ua/show/' + event.id">
-        <span>Купити квитки</span>
-      </a>
+      <template v-if="event.id">
+        <a class="btn-buy" :href="'/films/' + event.id + '#schedule'">
+          <span>Buy tickets</span>
+        </a>
+      </template>
+      <template v-else>
+        <p class="placeholder-glow my-0">
+          <span class="placeholder rounded" style="width: 125px"></span>
+        </p>
+      </template>
     </div>
   </div>
 </template>
@@ -74,7 +100,7 @@ const props = defineProps({
   display: block;
   height: 100%;
 }
-a.btn-play-circle {
+p.btn-play-circle {
   height: 28px !important;
   width: 28px;
   background-color: #ffa700;
@@ -84,9 +110,12 @@ a.btn-play-circle {
   color: #fff;
   text-decoration: none !important;
   font-size: 12px;
+  cursor: pointer;
   padding-left: 0;
 }
-
+.btn-play-circle span {
+  pointer-events: none;
+}
 .film-box-holder .film-box .sub-info {
   background: #fff;
   text-align: center;

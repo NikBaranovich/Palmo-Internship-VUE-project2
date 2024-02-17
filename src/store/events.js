@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import axiosInstanse from "@/services/axios.js";
+import axiosInstance from "@/services/axios.js";
 import {toast} from "vue3-toastify";
 import {ref, reactive, computed} from "vue";
 
@@ -16,14 +16,14 @@ export const useEventsStore = defineStore("events", () => {
     return topEventsState;
   });
 
-  let eventGenresState = reactive([]);
+  let genresState = reactive([]);
 
-  const eventGenres = computed(() => {
-    return eventGenresState;
+  const genres = computed(() => {
+    return genresState;
   });
 
   const fetchEvents = () => {
-    axiosInstanse
+    axiosInstance
       .get(`events/`, {
         params: {per_page: 100},
       })
@@ -36,7 +36,7 @@ export const useEventsStore = defineStore("events", () => {
   };
   const fetchSingleEvent = (id) => {
     return new Promise((resolve, reject) => {
-      axiosInstanse
+      axiosInstance
         .get(`events/${id}`)
         .then((response) => {
           resolve(response.data);
@@ -47,18 +47,25 @@ export const useEventsStore = defineStore("events", () => {
         });
     });
   };
-  const fetchEventGenres = async () => {
+  const fetchGenres = async () => {
     try {
-      const response = await axiosInstanse.get(`event-genres/`);
+      const response = await axiosInstance.get(`genres/`);
       response.data.forEach((genre) => {
-        eventGenresState.push(genre);
+        genresState.push(genre);
       });
     } catch (error) {
       toast.error(`Error while fetching events. ${error.message}`);
     }
   };
+  const incrementViews = async (id) => {
+    try {
+      await axiosInstance.get(`events/${id}/increment`);
+    } catch (error) {
+      toast.error(`Error. ${error.message}`);
+    }
+  };
   const fetchTopEvents = (limit) => {
-    axiosInstanse
+    axiosInstance
       .get(`events`, {
         params: {limit, ticket_top: true},
       })
@@ -75,7 +82,7 @@ export const useEventsStore = defineStore("events", () => {
 
   const fetchFilteredEvents = (page, startDate, venues, genres, city) => {
     startDate = startDate ? startDate.toLocaleString() : null;
-    axiosInstanse
+    axiosInstance
       .get(`events`, {
         params: {page, start_date: startDate, venues: venues, genres, city},
       })
@@ -86,14 +93,52 @@ export const useEventsStore = defineStore("events", () => {
         toast.error(`Error while fetching top events. ${error.message}`);
       });
   };
+
+  const searchEvents = async (title) => {
+    try {
+      const response = await axiosInstance.get(`events/search`, {
+        params: {
+          title,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      toast.error(`Error. ${error.message}`);
+    }
+  };
+
+  const rateEvent = (event_id, vote) => {
+    axiosInstance
+      .post(`events/${event_id}/rate`, {vote})
+      .then((response) => {
+        toast.success(`Event rated!`);
+      })
+      .catch((error) => {
+        toast.error(`Error rating. ${error.message}`);
+      });
+  };
+
+  const getUserRating = async (event_id) => {
+    try {
+      const response = await axiosInstance.get(`events/${event_id}/user-vote`);
+      console.log(response.data);
+      return response.data.vote;
+    } catch (error) {
+      toast.error(`Error. ${error.message}`);
+    }
+  };
   return {
     events,
     topEvents,
-    eventGenres,
+    genres,
     fetchEvents,
     fetchTopEvents,
     fetchFilteredEvents,
+    incrementViews,
     fetchSingleEvent,
-    fetchEventGenres,
+    fetchGenres,
+    searchEvents,
+    rateEvent,
+    getUserRating,
   };
 });

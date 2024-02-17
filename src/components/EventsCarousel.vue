@@ -23,17 +23,19 @@
         v-for="(event, index) in topEvents"
         :class="{active: index === 0}"
       >
-        <img
-          :src="
-            'http://localhost:8080/storage/events/backdrops' +
-            event.backdrop_path
-          "
-          class="d-block w-100"
-        />
-        <div class="carousel-caption d-none d-md-block">
-          <h5>{{ event.title }}</h5>
-          <p>{{ event.overview }}</p>
-        </div>
+        <a :href="'/films/' + event.id">
+          <img
+            :src="
+              'http://localhost:8080/storage/' +
+              event.backdrop_path
+            "
+            class="d-block w-100"
+          />
+          <div class="carousel-caption d-none d-md-block">
+            <h5>{{ event.title }}</h5>
+            <p>{{ event.overview }}</p>
+          </div>
+        </a>
       </div>
     </div>
   </div>
