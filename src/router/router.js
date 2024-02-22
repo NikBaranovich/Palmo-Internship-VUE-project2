@@ -61,15 +61,6 @@ router.beforeEach(async (to, from, next) => {
     next();
     return;
   }
-  if (to.matched.some((record) => record.name == "session")) {
-    if (!Number.isInteger(Number(to.params.id))) {
-      next({name: "notFound"});
-      return;
-
-    }
-    next();
-    return;
-  }
   if (to.matched.some((record) => record.meta.requireAuth == true)) {
     const {auth} = useAuthorizationStore();
     const {user} = storeToRefs(useAuthorizationStore());
@@ -99,6 +90,15 @@ router.beforeEach(async (to, from, next) => {
       next({name: "home"});
       return;
     }
+  }
+  if (to.matched.some((record) => record.name == "session")) {
+    if (!Number.isInteger(Number(to.params.id))) {
+      next({name: "notFound"});
+      return;
+
+    }
+    next();
+    return;
   }
   next();
 });

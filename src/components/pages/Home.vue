@@ -136,7 +136,7 @@ import {useCitiesStore} from "@/store/cities.js";
 
 const {events, fetchEvents} = useEventsStore();
 import {useAuthorizationStore} from "@/store/authorization.js";
-const {user, isUserLoading} = storeToRefs(useAuthorizationStore());
+const {user, isUserLoading} = useAuthorizationStore();
 const {preferredCity} = useCitiesStore();
 
 const {fetchTopEvents} = useRecomendationsStore();
@@ -160,12 +160,20 @@ onMounted(async () => {
 
   topTicketEvents.value = await fetchTopEvents({limit: 4, ticket_top: true});
 
-  topUserEvents.value = await fetchTopEvents({
-    limit: 9,
-    user: user.value.id,
-    ticket_top: true,
-  });
-
+  if (user.id) {
+    topUserEvents.value = await fetchTopEvents({
+      limit: 9,
+      user: user.id,
+      ticket_top: true,
+    });
+  }
+  if (preferredCity.id) {
+    topCityEvents.value = await fetchTopEvents({
+      limit: 8,
+      city: preferredCity.id,
+      ticket_top: true,
+    });
+  }
   topViewEvents.value = await fetchTopEvents({limit: 9, views_top: true});
   topRateEvents.value = await fetchTopEvents({limit: 9, rate_top: true});
 });
@@ -174,6 +182,13 @@ watch(preferredCity, async (preferredCity) => {
   topCityEvents.value = await fetchTopEvents({
     limit: 8,
     city: preferredCity.id,
+    ticket_top: true,
+  });
+});
+watch(user, async (user) => {
+  topUserEvents.value = await fetchTopEvents({
+    limit: 9,
+    user: user.id,
     ticket_top: true,
   });
 });
