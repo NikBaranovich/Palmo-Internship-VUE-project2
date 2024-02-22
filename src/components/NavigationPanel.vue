@@ -8,29 +8,32 @@
       <nav id="nav">
         <ul>
           <li><router-link :to="{name: 'films'}">Films</router-link></li>
-          <li><a href="/cinemas">Cinema</a></li>
         </ul>
       </nav>
 
-      <InputText
-        placeholder="Search"
-        v-model="searchText"
-        @focus="showElement($refs.eventOptions)"
-        @focusout="handleSearchInputFocusOut($refs.eventOptions)"
-        ref="eventInput"
-      />
-      <datalist
-        @click="handleDatalistEventClick($event, $refs.eventOptions)"
-        class="visually-hidden"
-        id="event-options"
-        ref="eventOptions"
-      >
-        <template v-for="event in events">
-          <option :value="event.id">
-            {{ event.title }}
-          </option>
-        </template>
-      </datalist>
+      <div class="form-group">
+        <fieldset class="position-relative">
+          <InputText
+            placeholder="Search"
+            v-model="searchText"
+            @focus="showElement($refs.eventOptions)"
+            @focusout="handleSearchInputFocusOut($refs.eventOptions)"
+            ref="eventInput"
+          />
+          <datalist
+            @click="handleDatalistEventClick($event, $refs.eventOptions)"
+            class="visually-hidden"
+            id="event-options"
+            ref="eventOptions"
+          >
+            <template v-for="event in events">
+              <option :value="event.id">
+                {{ event.title }}
+              </option>
+            </template>
+          </datalist>
+        </fieldset>
+      </div>
 
       <div class="head-links">
         <div class="user-panel">
@@ -39,17 +42,23 @@
             v-if="user && Object.keys(user).length"
             class="user-info"
           >
-            <span class="username">{{ user.name }}</span>
-            <button @click="logoutHandler">Logout</button>
+            <span class="username">Welcome, {{ user.name }}</span>
+            <button class="btn btn-danger" @click="logoutHandler">
+              Logout
+            </button>
           </div>
           <div v-else-if="isUserLoading">
             <p class="placeholder-glow my-0">
               <span class="placeholder rounded" style="width: 200px"></span>
             </p>
           </div>
-          <div v-else>
-            <router-link :to="{name: 'login'}">Login</router-link>
-            <router-link :to="{name: 'register'}">Register</router-link>
+          <div class="user-info" v-else>
+            <router-link class="btn btn-primary me-4" :to="{name: 'login'}"
+              >Login</router-link
+            >
+            <router-link class="btn btn-success" :to="{name: 'register'}"
+              >Register</router-link
+            >
           </div>
         </div>
         <city-list :cities="cities" />
@@ -163,18 +172,16 @@ function handleSearchInputFocusOut(datalist) {
 <style scoped>
 datalist {
   display: block !important;
-  position: absolute !important;
+  position: absolute;
   background-color: white;
   border: 1px solid #adb5bd;
-  border-radius: 0 0 5px 5px !important;
+  border-radius: 0 0 5px 5px;
   border-top: none;
-  width: 206px !important;
+  width: 100%;
   padding: 5px;
   max-height: 10rem;
   overflow-y: auto;
   z-index: 999;
-  left: 577px;
-  top: 44px;
 }
 
 option {
@@ -188,14 +195,19 @@ option:hover {
 }
 .username {
   padding-right: 5px;
-  max-width: 100px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
 }
 .user-info {
+  width: 200px;
   display: flex;
+  justify-content: flex-end;
   align-items: center;
+}
+.form-group {
+  width: 350px;
 }
 </style>

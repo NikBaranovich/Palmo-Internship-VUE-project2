@@ -46,9 +46,14 @@
       <Button @click="filterEvents()" label="Filter" />
     </div>
     <div class="film-list">
-      <ul v-for="event in events.data">
-        <EventListItem :event="event" />
-      </ul>
+      <template v-if="events.data?.length">
+        <ul v-for="event in events.data">
+          <EventListItem :event="event" />
+        </ul>
+      </template>
+      <template v-else>
+        <div class="film-placeholder">No Films</div>
+      </template>
     </div>
   </div>
   <div class="footer-pagination">
@@ -287,5 +292,13 @@ function scrollToTop() {
 .footer-pagination {
   display: flex;
   justify-content: center;
+}
+.film-placeholder {
+  height: 580px;
+  font-size: 50px;
+  color: rgb(113, 113, 113);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

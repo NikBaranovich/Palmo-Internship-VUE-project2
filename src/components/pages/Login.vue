@@ -23,9 +23,9 @@
         <div class="error" v-if="error">{{ error }}</div>
         <button type="submit" class="sign-in-button">Sign In</button>
       </form>
-      <button @click="signInWithGoogleHandler" class="google-button">
+      <a href="http://localhost:8080/googleauth/" class="google-button">
         Sign In with Google
-      </button>
+      </a>
     </div>
   </div>
 </template>
@@ -71,7 +71,10 @@ async function signInFormSubmit() {
 }
 
 //Google Sign In
-async function signInWithGoogleHandler() {}
+async function signInWithGoogleHandler() {
+
+
+}
 </script>
 <style>
 .sign-in {

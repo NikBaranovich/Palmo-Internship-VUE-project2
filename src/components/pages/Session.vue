@@ -46,9 +46,9 @@
                 width="100%"
                 height="100%"
               >
-                <template v-for="element in session.hall">
+                <template v-if="session.id" v-for="element in session.hall">
                   <template v-if="element.type === 'seat'">
-                    <rect
+                    <foreignObject
                       :data-id="element.id"
                       :x="element.x"
                       :y="element.y"
@@ -63,7 +63,25 @@
                           ? 'pointer'
                           : 'none',
                       }"
-                    ></rect>
+                    >
+                      <template
+                        v-if="element.is_enabled || element.type === 'table'"
+                      >
+                        <div
+                          class="seat-number"
+                          :style="{'background-color': element.color}"
+                        >
+                          {{ element.number }}
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="seat-number" style="background-color: gray">
+                          <img
+                            src="https://bilet.vkino.com.ua/i/scheme/seat-occupied.png"
+                          />
+                        </div>
+                      </template>
+                    </foreignObject>
                   </template>
                   <template v-if="element.type === 'table'">
                     <circle
@@ -74,25 +92,21 @@
                     ></circle>
                   </template>
                 </template>
-              </g>
-              <g id="labels" width="100%" height="100%">
-                <template v-for="element in session.hall">
-                  <template
-                    v-if="element.is_enabled || element.type === 'table'"
-                  >
-                    <text
-                      :x="+element.x + +element.width / 4 + 1"
-                      :y="+element.y + +element.height / 2 + 6"
+                <template
+                  v-for="element in JSON.parse(
+                    session.hall_item?.layout || '[]'
+                  )"
+                >
+                  <template v-if="element.type === 'scene'">
+                    <foreignObject
+                      class="scene-object"
+                      :x="element.x"
+                      :y="element.y"
+                      :width="element.width"
+                      :height="element.height"
                     >
-                      {{ element.number }}
-                    </text>
-                  </template>
-                  <template v-else>
-                    <image
-                      :x="+element.x + +element.width / 4 - 1"
-                      :y="+element.y + +element.height / 4 - 1"
-                      href="https://bilet.vkino.com.ua/i/scheme/seat-occupied.png"
-                    />
+                      <div class="scene">Scene</div>
+                    </foreignObject>
                   </template>
                 </template>
               </g>
@@ -111,10 +125,7 @@
     <div id="showtime-poster">
       <div class="showtime-poster">
         <img
-          :src="
-            'http://localhost:8080/storage/' +
-            session.event?.poster_path
-          "
+          :src="'http://localhost:8080/storage/' + session.event?.poster_path"
           :alt="session.event?.title"
           width="200"
           height="296"
@@ -165,15 +176,23 @@ const {fetchSingleSession} = useSessionsStore();
 const {processOrder, downloadTickets} = useTicketsStore();
 
 onMounted(async () => {
-  session.value = await fetchSingleSession(route.params.id);
+  
+  let response = await fetchSingleSession(route.params.id);
+  if (!response) {
+    router.push({
+      name: "notFound",
+    });
+    return;
+  }
+  session.value = response;
 });
 
 function toggleSeat(event, element) {
   if (!element.is_enabled) {
     return;
   }
-  event.target.classList.toggle("seat-selected");
-  if (event.target.classList.contains("seat-selected")) {
+  event.target.querySelector(".seat-number").classList.toggle("seat-selected");
+  if (event.target.querySelector(".seat-number").classList.contains("seat-selected")) {
     orders.push({
       id: element.id,
       group_name: element.group_name,
@@ -197,8 +216,7 @@ const showElement = (element) => {
 function handlePurchase() {
   processOrder(orders, session.value.id);
 
-  router.push("/", () => {
-  });
+  router.push("/", () => {});
 }
 function showPopup(event) {
   const popup = document.getElementById("popup");
@@ -231,7 +249,7 @@ function hidePopup(event) {
   font-size: 14px;
 }
 .seat-selected {
-  fill: #11952f;
+  border: 2px solid #11952f !important;
 }
 #places {
   cursor: pointer;
@@ -373,5 +391,33 @@ a.external {
   border-left: 1px dashed #8cabed;
   color: #8cabed;
   font-weight: 600;
+}
+.seat-number {
+  color: white;
+  font: 18px serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  border-radius: 5px;
+}
+.scene {
+  color: white;
+  font: 18px serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  background-color: rgb(149, 104, 32);
+  cursor: default !important;
+}
+.scene-object {
+  cursor: default !important;
 }
 </style>

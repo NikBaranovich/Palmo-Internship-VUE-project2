@@ -17,14 +17,15 @@ export const useVenuesStore = defineStore("venues", () => {
   });
 
   const fetchVenues = async (params) => {
-    params.start_date = params.start_date ? params.start_date.toLocaleString() : null;
+    params.start_date = params.start_date
+      ? params.start_date.toLocaleString()
+      : null;
 
     return new Promise((resolve, reject) => {
       axiosInstance
         .get(`entertainment_venues/`, {params})
         .then((response) => {
           venuesState.length = 0;
-          console.log("object");
           response.data.forEach((venue) => {
             venuesState.push(venue);
           });

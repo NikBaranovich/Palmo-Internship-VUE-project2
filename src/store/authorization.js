@@ -4,6 +4,7 @@ import axiosInstance from "@/services/axios.js";
 import {useCookies} from "vue3-cookies";
 const {cookies} = useCookies();
 import {useTicketsStore} from "@/store/tickets.js";
+import Echo from "laravel-echo";
 
 import {debounce} from "../hooks/useDebouce";
 
@@ -38,14 +39,29 @@ export const useAuthorizationStore = defineStore("authorization", () => {
         .then((response) => {
           Object.assign(userState, response.data);
           isUserLoadingState.value = false;
-          Echo.channel(`ticket-generation-${userState.id}`).listen(
-            "TicketGeneration",
+
+          window.Echo = new Echo({
+            broadcaster: "pusher",
+            authEndpoint: "http://localhost:8080/broadcasting/auth",
+            key: import.meta.env.VITE_PUSHER_APP_KEY,
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+            encrypted: true,
+            auth: {
+              headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          });
+
+          window.Echo.private(`user-${userState.id}`).listen(
+            ".ticket-generation",
             (e) => {
               downloadTickets(e.url);
             }
           );
-          Echo.channel(`email-notification-${userState.id}`).listen(
-            "EmailNotification",
+          window.Echo.private(`user-${userState.id}`).listen(
+            ".email-notification",
             (e) => {
               toast.info(e.message);
             }
@@ -55,6 +71,7 @@ export const useAuthorizationStore = defineStore("authorization", () => {
         .catch((error) => {
           toast.error(`User error. ${error.message}`);
           isUserLoadingState.value = false;
+          cookies.remove("personal_token");
           reject(error);
         });
     });
@@ -107,7 +124,10 @@ export const useAuthorizationStore = defineStore("authorization", () => {
     });
   }
 
-  async function signInWithGoogle() {}
+  async function signInWithGoogle(token) {
+    cookies.set("personal_token", token);
+    await auth()
+  }
 
   async function logout() {
     return new Promise((resolve, reject) => {

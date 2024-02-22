@@ -3,9 +3,7 @@
     <div class="visual-box">
       <img
         :alt="event.title"
-        :src="
-          'http://localhost:8080/storage/' + event.backdrop_path
-        "
+        :src="'http://localhost:8080/storage/' + event.backdrop_path"
       />
     </div>
     <div class="film-section-holder">
@@ -14,10 +12,7 @@
         <div class="film-info-holder">
           <div class="img-holder">
             <img
-              :src="
-                'http://localhost:8080/storage/' +
-                event.poster_path
-              "
+              :src="'http://localhost:8080/storage/' + event.poster_path"
               :alt="event.title"
             />
           </div>
@@ -32,7 +27,7 @@
               <span class="star"
                 ><span
                   :style="{
-                    width: parseFloat(event.rating_avg * 10).toFixed(0) + '%',
+                    width: parseFloat(event.rating_avg * 20).toFixed(0) + '%',
                   }"
                 ></span
               ></span>
@@ -169,13 +164,11 @@ watch(cities, async (cities) => {
       })
       .filter(Boolean);
   }
-
   venues.value = await fetchVenues({
     cities: selectedCitiesId.value,
     start_date: date.value,
     event: route.params.id,
   });
-  console.log(venues.value);
 });
 watch(
   () => route.query,
@@ -209,13 +202,11 @@ watch(
         })
         .filter(Boolean);
     }
-
     venues.value = await fetchVenues({
       cities: selectedCitiesId.value,
       start_date: date.value,
-      event: event.value.id,
+      event: route.params.id,
     });
-    console.log(venues.value);
   },
   {immediate: true}
 );
@@ -251,7 +242,14 @@ const {fetchSingleEvent, incrementViews, rateEvent, getUserRating} =
   useEventsStore();
 
 onMounted(async () => {
-  event.value = await fetchSingleEvent(route.params.id);
+  const response = await fetchSingleEvent(route.params.id);
+  if (!response) {
+    router.push({
+      name: "notFound",
+    });
+    return;
+  }
+  event.value = response;
   incrementViews(event.value.id);
 });
 
@@ -262,16 +260,20 @@ watch(
     venues.value = await fetchVenues({
       cities: selectedCitiesId.value,
       start_date: date.value,
-      event: event.value.id,
+      event: route.params.id,
     });
-    console.log(venues.value);
-
+    if (!user.value || !Object.keys(user.value).length) {
+      return;
+    }
     rating.value = Number(await getUserRating(event.value.id));
     previousRating.value = rating.value;
   }
 );
 
 watch(user.value, async (user) => {
+  if (!user || !Object.keys(user).length) {
+    return;
+  }
   rating.value = Number(await getUserRating(event.value.id));
   previousRating.value = rating.value;
 });

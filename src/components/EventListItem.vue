@@ -20,7 +20,7 @@
           <span class="star"
             ><span
               :style="{
-                width: parseFloat(event.rating_avg * 10).toFixed(0) + '%',
+                width: parseFloat(event.rating_avg * 20).toFixed(0) + '%',
               }"
             ></span
           ></span>

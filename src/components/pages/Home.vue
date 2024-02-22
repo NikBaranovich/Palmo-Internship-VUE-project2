@@ -148,6 +148,16 @@ const topRateEvents = ref(null);
 const placeholderEvents = ref([{}, {}, {}, {}, {}]);
 
 onMounted(async () => {
+  const parallax = document.getElementsByClassName("parallax");
+
+  window.addEventListener("scroll", function () {
+    let offset = window.pageYOffset;
+    for (let i = 0; i < parallax.length; i++) {
+      let element = parallax[i];
+      element.style.top = offset * 0.5 + "px";
+    }
+  });
+
   topTicketEvents.value = await fetchTopEvents({limit: 4, ticket_top: true});
 
   topUserEvents.value = await fetchTopEvents({
@@ -196,7 +206,6 @@ function getEmbedUrl(url) {
   const videoId = url?.split("=")[1];
   return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0&controls=1&modestbranding=1&enablejsapi=1&origin=https%3A%2F%2Fvkino.com.ua&widgetid=1`;
 }
-
 </script>
 <style scoped>
 .film-box-holder h2 {

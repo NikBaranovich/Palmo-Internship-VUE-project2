@@ -25,11 +25,8 @@
       >
         <a :href="'/films/' + event.id">
           <img
-            :src="
-              'http://localhost:8080/storage/' +
-              event.backdrop_path
-            "
-            class="d-block w-100"
+            :src="'http://localhost:8080/storage/' + event.backdrop_path"
+            class="d-block w-100 parallax position-relative"
           />
           <div class="carousel-caption d-none d-md-block">
             <h5>{{ event.title }}</h5>

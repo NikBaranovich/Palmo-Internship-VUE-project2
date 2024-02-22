@@ -1,7 +1,7 @@
 <template lang="">
   <div class="schedule-row">
     <div class="theater-info">
-      <a class="theater-name" href="/ua/cinema/5element"> {{ venue.name }} </a>
+      <a class="theater-name" href="#"> {{ venue.name }} </a>
     </div>
     <template v-for="hall in venue.halls">
       <div class="hall-holder" v-if="hall.sessions.length">

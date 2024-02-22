@@ -1,12 +1,13 @@
 <template lang="">
-  <div class="film-box">
+  <div class="film-box" :class="{premiere: isPremiere}">
+    <div class="premiere-title" v-if="isPremiere">
+      <span>Premiere</span>
+    </div>
     <div class="img-holder">
       <template v-if="event.id">
         <a :href="'/films/' + event.id">
           <img
-            :src="
-              'http://localhost:8080/storage/' + event.poster_path
-            "
+            :src="'http://localhost:8080/storage/' + event.poster_path"
             :alt="event.title"
             width="175"
             height="248"
@@ -56,10 +57,20 @@
   </div>
 </template>
 <script setup>
-import {defineProps, defineEmits, computed} from "vue";
+import {defineProps, defineEmits, computed, ref} from "vue";
+import {onMounted} from "vue";
 
+let isPremiere = ref(false);
 const props = defineProps({
   event: Object,
+});
+
+onMounted(() => {
+  const releaseDate = new Date(props.event.release_date);
+
+  if (releaseDate > new Date()) {
+    isPremiere.value = true;
+  }
 });
 </script>
 <style scoped>
@@ -119,7 +130,7 @@ p.btn-play-circle {
 .film-box-holder .film-box .sub-info {
   background: #fff;
   text-align: center;
-  padding: 10px 5px 0;
+  padding: 3px 5px 0;
 }
 
 .film-box .sub-info {
@@ -129,6 +140,14 @@ p.btn-play-circle {
 .film-title-list {
   padding-bottom: 7px;
 }
+.film-title-list span {
+  max-height: 32px;
+  width: 150px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .film-box-holder .film-title {
   font-size: 11px;
   line-height: 14px;
@@ -137,8 +156,10 @@ p.btn-play-circle {
   height: 28px;
   text-transform: uppercase;
   color: #2b231f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  display: table;
   width: 100%;
 }
 .film-box .btn-buy {
@@ -155,5 +176,25 @@ p.btn-play-circle {
   border-color: #d3cbc5;
   padding: 10px 5px 8px;
   margin: 0 -5px;
+}
+.film-box-holder .film-box.premiere {
+  border: 3px solid #ffba00;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  height: 325px;
+}
+
+.premiere-title {
+  display: block;
+  position: absolute;
+  padding-top: 3px;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  height: 30px;
+  background-color: #ffba00;
+  z-index: 1;
+  text-align: center;
 }
 </style>

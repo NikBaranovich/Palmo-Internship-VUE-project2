@@ -10,18 +10,14 @@ export const useSessionsStore = defineStore("sessions", () => {
     return sessionState.value;
   });
 
-  const fetchSingleSession = (id) => {
-    return new Promise((resolve, reject) => {
-      axiosInstance
-        .get(`sessions/${id}`)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          toast.error(`Error while fetching session. ${error.message}`);
-          reject(error);
-        });
-    });
+  const fetchSingleSession = async (id) => {
+    try {
+      const response = await axiosInstance.get(`sessions/${id}`);
+      return response.data;
+    } catch (error) {
+      toast.error(`Error while fetching session. ${error.message}`);
+      return null;
+    }
   };
 
   return {

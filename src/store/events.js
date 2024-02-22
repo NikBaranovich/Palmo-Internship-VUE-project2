@@ -34,18 +34,14 @@ export const useEventsStore = defineStore("events", () => {
         toast.error(`Error while fetching events. ${error.message}`);
       });
   };
-  const fetchSingleEvent = (id) => {
-    return new Promise((resolve, reject) => {
-      axiosInstance
-        .get(`events/${id}`)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          toast.error(`Error while fetching venues. ${error.message}`);
-          reject(error);
-        });
-    });
+  const fetchSingleEvent = async (id) => {
+    try {
+      const response = await axiosInstance.get(`events/${id}`);
+      return response.data;
+    } catch (error) {
+      toast.error(`Error while fetching events. ${error.message}`);
+      return null;
+    }
   };
   const fetchGenres = async () => {
     try {
@@ -121,7 +117,6 @@ export const useEventsStore = defineStore("events", () => {
   const getUserRating = async (event_id) => {
     try {
       const response = await axiosInstance.get(`events/${event_id}/user-vote`);
-      console.log(response.data);
       return response.data.vote;
     } catch (error) {
       toast.error(`Error. ${error.message}`);
