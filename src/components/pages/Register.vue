@@ -45,9 +45,9 @@
         <div class="error" v-if="error">{{ error }}</div>
         <button type="submit" class="register-button">Register</button>
       </form>
-      <button @click="signInWithGoogleHandler" class="google-button">
-        Register with Google
-      </button>
+      <a href="http://localhost:8080/googleauth/" class="google-button">
+        Sign In with Google
+      </a>
       <div>
         Already have an account?
         <router-link :to="{name: 'login'}"> Login</router-link>
@@ -103,7 +103,6 @@ const registerFormSubmit = async () => {
         errors[key] = error[key][0];
       }
     }
-
   }
   if (error.value) {
     return;
@@ -150,7 +149,7 @@ input {
 }
 
 .register-button {
-  background-color: var(--button-accent);
+  background-color: #3983dd;
   color: var(--text-color-contrast);
   padding: 10px 20px;
   border: none;

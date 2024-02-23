@@ -115,7 +115,7 @@ async function signInWithGoogleHandler() {
 }
 
 .sign-in-button {
-  background-color: var(--button-accent);
+  background-color: #397bdd;
   color: var(--text-color-contrast) !important;
   padding: 10px 20px;
   border: none;

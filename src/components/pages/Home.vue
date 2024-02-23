@@ -18,28 +18,29 @@
           id="film-holder-actual"
           class="film-box-holder"
         >
-          <h2>You might like it</h2>
-          <template v-if="topUserEvents">
-            <Carousel
-              :value="topUserEvents"
-              :numVisible="5"
-              :numScroll="2"
-              circular
-              :autoplayInterval="6000"
-            >
-              <template #item="slotProps">
-                <event-box :event="slotProps.data" />
-              </template>
-            </Carousel>
+          <template v-if="topUserEvents?.length">
+            <h2>You might like it</h2>
+            <template v-if="topUserEvents">
+              <Carousel
+                :value="topUserEvents"
+                :numVisible="5"
+                :numScroll="2"
+                circular
+                :autoplayInterval="6000"
+              >
+                <template #item="slotProps">
+                  <event-box :event="slotProps.data" />
+                </template>
+              </Carousel>
+            </template>
+            <template v-else>
+              <Carousel :value="placeholderEvents" :numVisible="5">
+                <template #item="slotProps">
+                  <event-box :event="slotProps.data" />
+                </template>
+              </Carousel>
+            </template>
           </template>
-          <template v-else>
-            <Carousel :value="placeholderEvents" :numVisible="5">
-              <template #item="slotProps">
-                <event-box :event="slotProps.data" />
-              </template>
-            </Carousel>
-          </template>
-
           <template v-if="topCityEvents?.length">
             <h2>Popular in your city: {{ preferredCity.name }}</h2>
             <template v-if="topCityEvents">
@@ -166,6 +167,8 @@ onMounted(async () => {
       user: user.id,
       ticket_top: true,
     });
+  } else {
+    topUserEvents.value = {};
   }
   if (preferredCity.id) {
     topCityEvents.value = await fetchTopEvents({
@@ -186,11 +189,15 @@ watch(preferredCity, async (preferredCity) => {
   });
 });
 watch(user, async (user) => {
-  topUserEvents.value = await fetchTopEvents({
-    limit: 9,
-    user: user.id,
-    ticket_top: true,
-  });
+  if (user.id) {
+    topUserEvents.value = await fetchTopEvents({
+      limit: 9,
+      user: user.id,
+      ticket_top: true,
+    });
+  } else {
+    topUserEvents.value = {};
+  }
 });
 
 function openTrailerModal(event) {
